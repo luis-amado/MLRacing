@@ -17,7 +17,8 @@ class Car:
                (maxX, maxY),
                (maxX, minY) ]
     for i in range(len(points)):
-      points[i] = mathutil.rotate_point(self.pos, points[i], self.rotation)
+      rotated = mathutil.rotate_point(self.pos, points[i], self.rotation)
+      points[i] = (round(rotated[0]), round(rotated[1]))
     return points
 
   def get_arrow(self):
@@ -37,17 +38,22 @@ class Car:
   def draw(self, surface):
     rect = self.get_rect()
     arrow = self.get_arrow()
-    pygame.draw.polygon(surface, "blue", rect)
-    pygame.draw.polygon(surface, "red", arrow)
+    pygame.draw.polygon(surface, "white", rect, 1)
+    pygame.draw.polygon(surface, "red", arrow, 1)
 
   def get_forward(self):
     return pygame.Vector2(math.sin(self.rotation), -math.cos(self.rotation))
 
-  def update(self):
-    deltaTime = 1/120
+  def update(self, deltaTime, map):
 
     top_speed = 300
     top_angular_speed = 200
+
+    for point in self.get_rect():
+          if map.get_at(point) == (20, 92, 32, 255):
+            return False
+          elif map.get_at(point) == (102, 102, 102, 255):
+            top_speed = 50
 
     acceleration = 500
     angular_acceleration = 400
@@ -69,7 +75,7 @@ class Car:
     self.pos += self.speed * deltaTime * self.get_forward()
     self.rotation += self.angular_speed * deltaTime
 
-
+    return True
 
   def rotate_to_face(self, point):
     point = pygame.Vector2(point) - self.pos
@@ -80,5 +86,5 @@ class Car:
   speed = 0
   angular_speed = 0
   rotation = 0
-  width = 14
-  length = 21
+  width = 20
+  length = 30

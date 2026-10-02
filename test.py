@@ -2,21 +2,22 @@ import pygame
 from pygame.locals import *
 from car import Car
 import numpy as np
-import math
 
 size = (1280, 720)
 track_color = (0,0,0,255)
-side_color = 0x666666
-grass_color = 0x145c20
+side_color = (102, 102, 102)
+grass_color = (20, 92, 32)
+
+FPS = 120
 
 pygame.init()
-screen = pygame.display.set_mode(size)
+screen = pygame.display.set_mode(size, flags=pygame.NOFRAME)
 pygame.display.set_caption("")
 clock = pygame.time.Clock()
 running = True
 
 track_surface = pygame.Surface(size).convert_alpha()
-map_surface = pygame.Surface(size)
+map_surface = pygame.Surface(size).convert_alpha()
 
 def clear_map():
   track_surface.fill((0,0,0,0))
@@ -26,13 +27,14 @@ clear_map()
 clicked = False
 last_pos = None
 track_size = 100
-side_size = 20
+side_size = 30
 
 font = pygame.font.SysFont("Arial", 20)
 
 mode = "DRAWING"
 
 car = Car()
+deltaTime = 1/FPS
 
 def draw_track_segment(pos):
   pygame.draw.circle(track_surface, track_color, pos, track_size / 2)
@@ -55,6 +57,14 @@ while running:
       elif event.unicode == "2": 
         map_surface.blit(track_surface, (0,0))
         mode = "PLACING_CAR"
+      elif event.unicode == "o":
+        pygame.image.save(map_surface, "tracks/my_track.png")
+      elif event.unicode == "w" and event.mod == 1024:
+        pygame.quit()
+        running = False
+        break
+
+  if not running: break
 
   if mode == "DRAWING":
     if pygame.key.get_pressed()[ord('c')]:
@@ -74,7 +84,7 @@ while running:
     car.angular_speed = 0
     screen.blit(map_surface, (0,0))
 
-    car.pos = pygame.mouse.get_pos()
+    car.pos = pygame.Vector2(pygame.mouse.get_pos())
     car.draw(screen)
     if pygame.mouse.get_pressed()[0]:
       mode = "ROTATING_CAR"
@@ -90,14 +100,20 @@ while running:
 
   elif mode == "CAR_PLACED":
     screen.blit(map_surface, (0,0))
-    car.update()
+    alive = car.update(deltaTime, map_surface)
     car.draw(screen)
+    if not alive:
+      mode = "DEAD"
+  elif mode == "DEAD":
+    screen.blit(map_surface, (0,0))
 
   mode_text = font.render(mode, False, "white")
+  fps_test = font.render(f"{clock.get_fps():.0f} fps", False, "white")
   screen.blit(mode_text, (10, 10))
+  screen.blit(fps_test, (10, 30))
 
   pygame.display.flip()
 
-  clock.tick(120)
+  deltaTime = clock.tick(FPS) / 1000
 
 pygame.quit()
