@@ -1,7 +1,6 @@
 import pygame
 from pygame.locals import *
-from car import Car
-import numpy as np
+from ml_racing.car import Car
 
 size = (1280, 720)
 track_color = (0,0,0,255)

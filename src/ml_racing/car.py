@@ -1,5 +1,5 @@
 import pygame
-import mathutil
+import ml_racing.mathutil as mathutil
 import math
 
 class Car:
