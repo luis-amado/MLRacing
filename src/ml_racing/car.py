@@ -1,5 +1,5 @@
 import pygame
-import ml_racing.mathutil as mathutil
+import ml_racing.engine.mathutil as mathutil
 import math
 
 class Car:
@@ -44,16 +44,29 @@ class Car:
   def get_forward(self):
     return pygame.Vector2(math.sin(self.rotation), -math.cos(self.rotation))
 
+  def is_outside_map(self, point, map):
+    size = map.get_size()
+    return point[0] < 0 or point[1] < 0 or point[0] >= size[0] or point[1] >= size[1]
+
+  def has_won(self, map):
+    points = self.get_rect()
+    for point in points:
+      if not self.is_outside_map(point, map) and map.get_at(point) == (252, 194, 3, 255):
+        return True
+    return False
+
   def update(self, deltaTime, map):
 
     top_speed = 300
     top_angular_speed = 200
+    restricted = False
 
     for point in self.get_rect():
-          if map.get_at(point) == (20, 92, 32, 255):
-            return False
-          elif map.get_at(point) == (102, 102, 102, 255):
-            top_speed = 50
+      if self.is_outside_map(point, map) or map.get_at(point) == (102, 102, 102, 255):
+        top_speed = 50
+        restricted = True
+      elif map.get_at(point) == (20, 92, 32, 255):
+        return False
 
     acceleration = 500
     angular_acceleration = 400
@@ -64,8 +77,8 @@ class Car:
     rotation_input = (mathutil.keyMapTo1(keys, 'd') - mathutil.keyMapTo1(keys, 'a')) * math.radians(top_angular_speed)
 
     deceleration_boost = 1
-    if mathutil.diffSign(self.speed, forward_input):
-      deceleration_boost = 2
+    if mathutil.diffSign(self.speed, forward_input) or restricted:
+      deceleration_boost = 2.5
     self.speed = mathutil.moveTowards(self.speed, forward_input, acceleration * deceleration_boost * deltaTime)
     angular_boost = 1
     if mathutil.diffSign(self.angular_speed, rotation_input):

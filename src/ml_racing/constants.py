@@ -1,0 +1,13 @@
+import ml_racing.engine.screen as screen
+
+TRACK_COLOR = (0,0,0,255)
+SIDE_COLOR = (102, 102, 102)
+GRASS_COLOR = (20, 92, 32)
+GOAL_COLOR = (252, 194, 3)
+
+TRACK_SIZE = 100
+SIDE_SIZE = 30
+
+TOOLBAR_HEIGHT = 60
+
+TRACK_HEIGHT = screen.SCREEN_SIZE[1] - TOOLBAR_HEIGHT
